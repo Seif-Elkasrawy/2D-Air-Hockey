@@ -2,20 +2,25 @@
 #include <windows.h>
 #include <gl/gl.h>
 #include <math.h>
+#include <time.h>
 #include <iostream>
 #include "AirHockeytrialno1000.h"
 #include "RGBPixmap.h"
 #include "Table.h"
 
+#define FPS 30
 
 //Global variables
 RGBpixmap MalletR;
 RGBpixmap MalletB;
+RGBpixmap Galaxy;
 
 double Rz = 1;
 
 UINT prevFrameTime = -1;
 float currXPosition = 0;
+
+int initialTime = time(NULL), finalTime, frameCount = 0;
 
 int puckX = window_width / 2;
 int puckY = window_height / 2;
@@ -32,6 +37,9 @@ const int buttonHeight = 50;
 
 int malletWidth = 24 * 5;
 int malletHeight = 24 * 5;
+
+string score1STR = " ", score2STR = " ";
+int score1 = 0, score2 = 0;
 
 bool MouseClicked = false;
 bool MouseMoved = false;
@@ -64,7 +72,7 @@ void MouseX_Y(int x, int y) {
     }
 }
 
-void DrawButton(int buttonX, int buttonY, std::string buttonText) {
+void DrawButton(int buttonX, int buttonY, string buttonText) {
     glColor3f(0.5, 0.0, 0.5);  // Set button color
     glBegin(GL_QUADS);
     glVertex2i(buttonX, buttonY);
@@ -78,6 +86,25 @@ void DrawButton(int buttonX, int buttonY, std::string buttonText) {
     for (int i = 0; i < buttonText.length(); ++i) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buttonText[i]);
     }
+}
+
+void DrawGoal(int scoreX, int scoreY1, int scoreY2) {
+
+    glColor3f(1.0, 1.0, 1.0);  // Set text color
+    glPushMatrix();
+
+    glRasterPos2i(scoreX, scoreY1);
+    for (char c : score2STR)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+    }
+
+    glRasterPos2i(scoreX, scoreY2);
+    for (char c : score1STR)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+    }
+    glPopMatrix();
 }
 
 void Draw_Coordinates()
@@ -97,21 +124,20 @@ void Draw_Coordinates()
 // Update function
 void update(int value) {
 
+    //UINT currTime = GetTickCount64();
+    ////the first update?
+    //if (prevFrameTime == -1) {
+    //    prevFrameTime = currTime;
+    //    return;
+    //}
+    //float dt = (currTime - prevFrameTime) / 1000.0;
+
+
+    //Rz -= 30 * dt;
+
+    //prevFrameTime = currTime;
     //int random = (rand() % (ub - lb + 1)) + lb;
-    UINT currTime = GetTickCount64();
-    //the first update?
-    if (prevFrameTime == -1) {
-        prevFrameTime = currTime;
-        return;
-    }
-    float dt = (currTime - prevFrameTime) / 1000.0;
 
-
-    Rz -= 30 * dt;
-
-    prevFrameTime = currTime;
-
-    //PlaySound(TEXT("1.wav"), NULL, SND_ASYNC);
 
     // Update puck position
     puckX += puckSpeedX;
@@ -165,7 +191,7 @@ void PuckCollision()
         }
     }
 
-    if (puckY + puckRadius > window_height - 10  && !(puckX >= 250 && puckX <= 350)) {
+    if (puckY + puckRadius > window_height - 10 && !(puckX >= 250 && puckX <= 350)) {
         wallCollision = true;
         if (puckSpeedY > 0) {
             puckSpeedY *= -1;
@@ -178,9 +204,24 @@ void PuckCollision()
         }
     }
 
+    if (puckY + puckRadius < 5) {
+        puckX = window_width / 2;
+        puckY = window_height / 2;
+        Sleep(5000);
+        PuckCollision();
+        score2++;
+    }
+    else if (puckY - puckRadius > window_height - 5) {
+        puckX = window_width / 2;
+        puckY = window_height / 2;
+        Sleep(5000);
+        PuckCollision();
+        score1++;
+    }
+
     // Calculate the distance between the center of the puck and the mallet
     float distance = GetDistance(puckX, puckY, X + malletWidth / 2.0, Y + malletHeight / 2.0);
-    cout << "distance = " << distance << endl;
+   // cout << "distance = " << distance << endl;
     // Check if the puck collides with the mallet
     if ((distance <= puckRadius + malletWidth / 2.0 - 10))
     {
@@ -232,10 +273,24 @@ void GameScreen() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     SetTransformations();
+    glEnable(GL_TEXTURE_2D);
+
+    glPushMatrix();
+    glPixelZoom(1, 1);
+    glRasterPos2f(0, 0);
+    Galaxy.draw();
+    glPopMatrix();
 
     DrawTable();
 
-    glEnable(GL_TEXTURE_2D);
+    int scoreX = 525, scoreY1 = 525, scoreY2 = 175;
+    score1STR = std::to_string(score1);
+    score2STR = std::to_string(score2);
+
+    DrawGoal(scoreX, scoreY1, scoreY2);
+
+
+    //glEnable(GL_TEXTURE_2D);
     glPushMatrix();
     glPixelZoom(5, 5);
     glRasterPos2f(X, Y);
@@ -264,8 +319,8 @@ void StartScreen() {
 
     SetTransformations();
 
-    std::string buttonStart = "Start";
-    std::string buttonExit = "Exit";
+    string buttonStart = "Start";
+    string buttonExit = "Exit";
     // Button position
     const int StartButtonX = 250;
     const int StartButtonY = 350;
@@ -292,7 +347,7 @@ void OnDisplay() {
         cout << "Mouse position " << X << " , " << Y << endl;
         screenSwitch = 1;
     }
-    if (X + 60 >= 250 && X + 60 <= 350 && Y + 60 >= 250 && Y + 60 <= 300) {
+    if (X + 60 >= 250 && X + 60 <= 350 && Y + 60 >= 250 && Y + 60 <= 300 && screenSwitch == 0) {
         cout << "Mouse position " << X << " , " << Y << endl;
         exit(0);
     }
