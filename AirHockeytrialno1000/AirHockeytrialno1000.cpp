@@ -156,13 +156,13 @@ void PuckCollision()
         }
     }
 
-    if (puckY + puckRadius > window_height - 10) {
+    if (puckY + puckRadius > window_height - 10  && !(puckX >= 250 && puckX <= 350)) {
         wallCollision = true;
         if (puckSpeedY > 0) {
             puckSpeedY *= -1;
         }
     }
-    else if (puckY - puckRadius < 10) {
+    else if (puckY - puckRadius < 10 && !(puckX >= 250 && puckX <= 350)) {
         wallCollision = true;
         if (puckSpeedY < 0) {
             puckSpeedY *= -1;
