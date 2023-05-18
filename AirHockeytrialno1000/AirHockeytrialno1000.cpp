@@ -30,10 +30,6 @@ float R = 0.0f;
 const int buttonWidth = 100;
 const int buttonHeight = 50;
 
-// Button position
-const int buttonX = 250;
-const int buttonY = 350;
-
 int malletWidth = 24 * 5;
 int malletHeight = 24 * 5;
 
@@ -68,7 +64,7 @@ void MouseX_Y(int x, int y) {
     }
 }
 
-void DrawButton() {
+void DrawButton(int buttonX, int buttonY, std::string buttonText) {
     glColor3f(0.5, 0.0, 0.5);  // Set button color
     glBegin(GL_QUADS);
     glVertex2i(buttonX, buttonY);
@@ -79,7 +75,6 @@ void DrawButton() {
 
     glColor3f(0.0, 1.0, 0.5);  // Set text color
     glRasterPos2i(buttonX + 30, buttonY + 20);
-    std::string buttonText = "Start";
     for (int i = 0; i < buttonText.length(); ++i) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buttonText[i]);
     }
@@ -103,6 +98,20 @@ void Draw_Coordinates()
 void update(int value) {
 
     //int random = (rand() % (ub - lb + 1)) + lb;
+    UINT currTime = GetTickCount64();
+    //the first update?
+    if (prevFrameTime == -1) {
+        prevFrameTime = currTime;
+        return;
+    }
+    float dt = (currTime - prevFrameTime) / 1000.0;
+
+
+    Rz -= 30 * dt;
+
+    prevFrameTime = currTime;
+
+    //PlaySound(TEXT("1.wav"), NULL, SND_ASYNC);
 
     // Update puck position
     puckX += puckSpeedX;
@@ -255,7 +264,16 @@ void StartScreen() {
 
     SetTransformations();
 
-    DrawButton();
+    std::string buttonStart = "Start";
+    std::string buttonExit = "Exit";
+    // Button position
+    const int StartButtonX = 250;
+    const int StartButtonY = 350;
+    DrawButton(StartButtonX, StartButtonY, buttonStart);
+    const int ExitButtonX = 250;
+    const int ExitButtonY = 250;
+    DrawButton(ExitButtonX, ExitButtonY, buttonExit);
+
 
     // Swap the buffers
     glFlush();
@@ -273,6 +291,10 @@ void OnDisplay() {
     if (X + 60 >= 250 && X + 60 <= 350 && Y + 60 >= 350 && Y + 60 <= 400) {
         cout << "Mouse position " << X << " , " << Y << endl;
         screenSwitch = 1;
+    }
+    if (X + 60 >= 250 && X + 60 <= 350 && Y + 60 >= 250 && Y + 60 <= 300) {
+        cout << "Mouse position " << X << " , " << Y << endl;
+        exit(0);
     }
 
     if (screenSwitch == 0) {
