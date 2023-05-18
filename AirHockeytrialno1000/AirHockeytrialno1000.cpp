@@ -15,6 +15,9 @@ RGBpixmap MalletR;
 RGBpixmap MalletB;
 RGBpixmap Galaxy;
 
+double TX = window_width / 2 - 60;
+double TY = window_height - 140;
+
 double Rz = 1;
 
 UINT prevFrameTime = -1;
@@ -26,8 +29,8 @@ int puckX = window_width / 2;
 int puckY = window_height / 2;
 int puckRadius = 20;
 
-float puckSpeedX = 2.0f;
-float puckSpeedY = 2.0f;
+float puckSpeedX = 5.0f;
+float puckSpeedY = 5.0f;
 
 float R = 0.0f;
 
@@ -70,6 +73,29 @@ void MouseX_Y(int x, int y) {
         X = x - 60;
         Y = 700 - y - 60;
     }
+}
+
+void OnSpecialKeyPress(int key, int x, int y)
+{
+    switch (key)
+    {
+    case GLUT_KEY_LEFT://		Left function key
+        TX -= 15;
+        sndPlaySound(TEXT("crash.wav"), SND_ASYNC);
+        break;
+    case GLUT_KEY_RIGHT://		Right function key
+        TX += 15;
+        sndPlaySound(TEXT("crash.wav"), SND_ASYNC);
+        break;
+    case GLUT_KEY_UP://		Jump function key
+        TY -= 20;
+        sndPlaySound(TEXT("jump.wav"), SND_ASYNC);
+        break;
+    case GLUT_KEY_DOWN://		Jump function key
+        TY += 20;
+        sndPlaySound(TEXT("jump.wav"), SND_ASYNC);
+        break;
+    };
 }
 
 void DrawButton(int buttonX, int buttonY, string buttonText) {
@@ -122,7 +148,7 @@ void Draw_Coordinates()
 }
 
 // Update function
-void update(int value) {
+void Update(int value) {
 
     //UINT currTime = GetTickCount64();
     ////the first update?
@@ -149,7 +175,7 @@ void update(int value) {
     MalletBCollision();
 
     glutPostRedisplay();
-    glutTimerFunc(16, update, 0);
+    glutTimerFunc(16, Update, 0);
 }
 
 void MalletRCollision()
@@ -170,15 +196,15 @@ void MalletRCollision()
 void MalletBCollision()
 {
     // Collision detection with walls
-    if (X > 425)
-        X = 425;
-    else if (X < 50) {
-        X = 50;
+    if (TX > 425)
+        TX = 425;
+    else if (TX < 50) {
+        TX = 50;
     }
-    if (Y < (window_height / 2 + 100))
-        Y = (window_height / 2 + 100);
-    else if (Y > 690) {
-        Y = 690;
+    if (TY < (window_height / 2))
+        TY = (window_height / 2);
+    else if (TY > 690) {
+        TY = 690;
     }
 }
 
@@ -224,21 +250,30 @@ void PuckCollision()
     if (puckY + puckRadius < 5) {
         puckX = window_width / 2;
         puckY = window_height / 2;
-        Sleep(5000);
+        glRasterPos2f(window_width / 2 - 60, 20);
+        MalletR.draw();
+        //Sleep(3000);
         PuckCollision();
         score2++;
     }
     else if (puckY - puckRadius > window_height - 5) {
         puckX = window_width / 2;
         puckY = window_height / 2;
-        Sleep(5000);
+        //Sleep(3000);
         PuckCollision();
         score1++;
     }
 
+    PuckMalletCollision(puckX, puckY, X, Y);
+
+    PuckMalletCollision(puckX, puckY, TX, TY);
+
+}
+
+void PuckMalletCollision(int puckX, int puckY, int X, int Y)
+{
     // Calculate the distance between the center of the puck and the mallet
     float distance = GetDistance(puckX, puckY, X + malletWidth / 2.0, Y + malletHeight / 2.0);
-   // cout << "distance = " << distance << endl;
     // Check if the puck collides with the mallet
     if ((distance <= puckRadius + malletWidth / 2.0 - 10))
     {
@@ -257,7 +292,6 @@ void PuckCollision()
     }
     else
         R = 0.0f;
-
 }
 
 void SetTransformations() {
@@ -311,13 +345,12 @@ void GameScreen() {
     glPushMatrix();
     glPixelZoom(5, 5);
     glRasterPos2f(X, Y);
-    MalletRCollision();
     MalletR.draw();
     glPopMatrix();
 
     glPushMatrix();
     glPixelZoom(5, 5);
-    glRasterPos2f(window_width / 2 - 60, window_height - 140);
+    glRasterPos2f(TX, TY);
     MalletB.draw();
     glPopMatrix();
 
@@ -396,7 +429,9 @@ void InitGraphics(int argc, char* argv[]) {
     glutMouseFunc(mouse);
     glutMotionFunc(MouseX_Y);
 
-    glutTimerFunc(0, update, 0);
+    glutSpecialFunc(OnSpecialKeyPress);
+
+    glutTimerFunc(0, Update, 0);
 
     glutDisplayFunc(OnDisplay);
     glutIdleFunc(OnDisplay);
