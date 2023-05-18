@@ -24,6 +24,8 @@ int puckRadius = 20;
 float puckSpeedX = 2.0f;
 float puckSpeedY = 2.0f;
 
+float R = 0.0f;
+
 // Button dimensions
 const int buttonWidth = 100;
 const int buttonHeight = 50;
@@ -32,8 +34,8 @@ const int buttonHeight = 50;
 const int buttonX = 250;
 const int buttonY = 350;
 
-int malletWidth = MalletR.nCols;
-int malletHeight = MalletR.nRows;
+int malletWidth = 24 * 5;
+int malletHeight = 24 * 5;
 
 bool MouseClicked = false;
 bool MouseMoved = false;
@@ -99,13 +101,13 @@ void Draw_Coordinates()
 
 // Update function
 void update(int value) {
- 
+
     //int random = (rand() % (ub - lb + 1)) + lb;
 
     // Update puck position
  //   if (random == 1) {
-        puckX += puckSpeedX;
-        puckY += puckSpeedY;
+    puckX += puckSpeedX;
+    puckY += puckSpeedY;
     //}
     //else {
     //    puckX -= puckSpeedX;
@@ -125,61 +127,85 @@ void MalletRCollision()
     // Collision detection with walls
     if (X > 425)
         X = 425;
-    else if (X - malletWidth < 50) {
+    else if (X < 50) {
         X = 50;
     }
-    if (Y > window_height / 2 - 100)
-        Y = window_height / 2 - 100;
-    else if (Y - malletHeight < 10) {
+    if (Y > (window_height / 2 - 100))
+        Y = (window_height / 2 - 100);
+    else if (Y < 10) {
         Y = 10;
     }
 }
 
+double GetDistance(double x1, double y1, double x2, double y2) {
+    return sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2));
+}
+
 void PuckCollision()
 {
+    boolean wallCollision = false;
 
     //to get normal of point of collision get center of puck and center of mallet
     // get angle between two vectors
     // get dot product of 2 vectors to get angle betwen them 
     // Collision detection with walls
-    if (puckX + puckRadius > window_width - 50 || puckX - puckRadius < 50) {
-        puckSpeedX *= -1;
+    if (puckX + puckRadius > window_width - 50) {
+        wallCollision = true;
+        if (puckSpeedX > 0) {
+            puckSpeedX *= -1;
+        }
         //if (puckSpeedX > 0)
         //    puckSpeedX -= 0.1;
         //else
         //    puckSpeedX += 0.1;
     }
-        
-    if (puckY + puckRadius > window_height - 10 || puckY - puckRadius < 10) {
-        puckSpeedY *= -1;
+    else if (puckX - puckRadius < 50) {
+        wallCollision = true;
+        if (puckSpeedX < 0) {
+            puckSpeedX *= -1;
+        }
+    }
+
+    if (puckY + puckRadius > window_height - 10) {
+        wallCollision = true;
+        if (puckSpeedY > 0) {
+            puckSpeedY *= -1;
+        }
+
         //if (puckSpeedY > 0)
         //    puckSpeedY -= 0.1;
         //else
         //    puckSpeedY += 0.1;
     }
+    else if (puckY - puckRadius < 10) {
+        wallCollision = true;
+        if (puckSpeedY < 0) {
+            puckSpeedY *= -1;
+        }
+    }
 
     // Calculate the distance between the center of the puck and the mallet
-    //float distance = sqrt(pow(puckX - (X + malletWidth/2), 2) + pow(puckY - (Y + malletHeight / 2), 2));
+    float distance = GetDistance(puckX, puckY, X + malletWidth / 2.0, Y + malletHeight / 2.0);
+    cout << "distance = " << distance << endl;
+    // Check if the puck collides with the mallet
+    if ((distance <= puckRadius + malletWidth / 2.0 - 10))
+    {
+        R = 1.0f;
 
-    //// Check if the puck collides with the mallet
-    //if (distance <= puckRadius + malletWidth && puckY - puckRadius <= Y + malletHeight && puckY + puckRadius >= Y - malletHeight)
-    //{
-    //    // Calculate the angle between the puck and the mallet
-    //    float angle = atan2(puckY - Y, puckX - X);
+        // Calculate the angle between the puck and the mallet
+        float angle = atan2(puckY - (Y + malletHeight / 2.0), puckX - (X + malletWidth / 2.0));
 
-    //    // Calculate the new puck velocity after collision
-    //    float newSpeedX = cos(angle) * sqrt(pow(puckSpeedX, 2) + pow(puckSpeedY, 2));
-    //    float newSpeedY = sin(angle) * sqrt(pow(puckSpeedX, 2) + pow(puckSpeedY, 2));
+        // Calculate the new puck velocity after collision
+        float newSpeedX = cos(angle) * sqrt(pow(puckSpeedX, 2) + pow(puckSpeedY, 2));
+        float newSpeedY = sin(angle) * sqrt(pow(puckSpeedX, 2) + pow(puckSpeedY, 2));
 
-    //    // Reverse the puck's direction
-    //    puckSpeedX = -newSpeedX;
-    //    puckSpeedY = -newSpeedY;
-    //}
-    // Collision detection with paddle
-    if ((puckX + puckRadius >= X - malletWidth|| puckX - puckRadius <= X + malletWidth) && puckY + puckRadius >= Y - malletHeight && puckY - puckRadius <= Y + malletHeight)
-        puckSpeedX *= -1;
-    if ((puckY + puckRadius >= Y - malletHeight || puckY - puckRadius <= Y + malletHeight) && puckX + puckRadius >= X - malletWidth && puckX - puckRadius <= X + malletWidth)
-        puckSpeedY *= -1;
+        // Reverse the puck's direction
+        puckSpeedX = newSpeedX;
+        puckSpeedY = newSpeedY;
+    }
+    else
+        R = 0.0f;
+
 }
 
 void SetTransformations() {
@@ -187,13 +213,14 @@ void SetTransformations() {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0, window_width, 0.0, window_height, - 1, 1);
+    glOrtho(0.0, window_width, 0.0, window_height, -1, 1);
 }
 
 void DrawPuck()
 {
     glBegin(GL_TRIANGLE_FAN);
-    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glColor3f(R, 0.5f, 1.0f);
     glVertex2f(puckX, puckY);
     for (int i = 0; i <= 360; i++) {
         float angle = 2.0f * PI * i / 360;
@@ -218,6 +245,7 @@ void GameScreen() {
     glPushMatrix();
     glPixelZoom(5, 5);
     glRasterPos2f(X, Y);
+    MalletRCollision();
     MalletR.draw();
     glPopMatrix();
 
@@ -289,9 +317,11 @@ void InitGraphics(int argc, char* argv[]) {
     glutMouseFunc(mouse);
     glutMotionFunc(MouseX_Y);
 
+    glutTimerFunc(0, update, 0);
+
     glutDisplayFunc(OnDisplay);
     glutIdleFunc(OnDisplay);
-    glutTimerFunc(0, update, 0);
+
     glutMainLoop();
 }
 
