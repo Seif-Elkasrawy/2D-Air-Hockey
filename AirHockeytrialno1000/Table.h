@@ -38,37 +38,41 @@ void drawFilledCircle(float cx, float cy, float r, int num_segments)
 }
 
 void DrawTable() {
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2i(50, 100);  // bottom-left corner
-    glVertex2i(550, 100); // bottom-right corner
-    glVertex2i(550, 700); // top-right corner
-    glVertex2i(50, 700);  // top-left corner
-    glEnd();
+    //glColor3f(0.0f, 0.0f, 0.0f);
+    //glBegin(GL_QUADS);
+    //glVertex2i(50, 100);  // bottom-left corner
+    //glVertex2i(550, 100); // bottom-right corner
+    //glVertex2i(550, 700); // top-right corner
+    //glVertex2i(50, 700);  // top-left corner
+    //glEnd();
 
     // Draw the lines with different colors
     glLineWidth(10.0f);
     glBegin(GL_LINES);
     glColor3f(1.0f, 0.5f, 0.5f);
-    glVertex2i(50, 0);  // bottom-left corner
+    glVertex2i(50, 0);  // Bottom - Left corner
     glColor3f(1.0f, 1.0f, 0.5f);
-    glVertex2i(50, window_height);  // top-left corner
+    glVertex2i(50, window_height);  // Top - Left corner
 
     glColor3f(0.5f, 0.5f, 1.0f);
-    glVertex2i(550, 0); // bottom-right corner
+    glVertex2i(550, 0); // Bottom - Right corner
     glColor3f(0.5f, 1.0f, 1.0f);
-    glVertex2i(550, window_height); // top-right corner
+    glVertex2i(550, window_height); // Top-Right corner
 
     glColor3f(0.5f, 0.5f, 0.5f);
-    glVertex2i(550, window_height / 2); // center of right line
-    glVertex2i(50, window_height / 2); // center of left line
+    glVertex2i(550, window_height / 2); // Right line
+    glVertex2i(50, window_height / 2); // Left line
 
     glColor3f(0.5f, 1.0f, 0.5f);
-    glVertex2i(550, window_height); // center of top-right line
-    glVertex2i(50, window_height); // center of top-left line
+    glVertex2i(550, window_height); // Top - right line
+    glVertex2i(350, window_height); 
+    glVertex2i(50, window_height); // Top - left line
+    glVertex2i(250, window_height); 
 
-    glVertex2i(550, 0); // center of bottom-right line
-    glVertex2i(50, 0); // center of bottom-left line
+    glVertex2i(550, 0); // Bottom - right line
+    glVertex2i(350, 0);
+    glVertex2i(50, 0); // Bottom - left line
+    glVertex2i(250, 0); 
 
     //Grey Borders
     glPushMatrix();

@@ -105,14 +105,8 @@ void update(int value) {
     //int random = (rand() % (ub - lb + 1)) + lb;
 
     // Update puck position
- //   if (random == 1) {
     puckX += puckSpeedX;
     puckY += puckSpeedY;
-    //}
-    //else {
-    //    puckX -= puckSpeedX;
-    //    puckY -= puckSpeedY;
-    //}
 
     PuckCollision();
 
@@ -154,10 +148,6 @@ void PuckCollision()
         if (puckSpeedX > 0) {
             puckSpeedX *= -1;
         }
-        //if (puckSpeedX > 0)
-        //    puckSpeedX -= 0.1;
-        //else
-        //    puckSpeedX += 0.1;
     }
     else if (puckX - puckRadius < 50) {
         wallCollision = true;
@@ -171,11 +161,6 @@ void PuckCollision()
         if (puckSpeedY > 0) {
             puckSpeedY *= -1;
         }
-
-        //if (puckSpeedY > 0)
-        //    puckSpeedY -= 0.1;
-        //else
-        //    puckSpeedY += 0.1;
     }
     else if (puckY - puckRadius < 10) {
         wallCollision = true;
