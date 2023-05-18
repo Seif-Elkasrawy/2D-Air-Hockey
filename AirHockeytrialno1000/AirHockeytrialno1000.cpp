@@ -146,6 +146,7 @@ void update(int value) {
     PuckCollision();
 
     MalletRCollision();
+    MalletBCollision();
 
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
@@ -166,6 +167,22 @@ void MalletRCollision()
     }
 }
 
+void MalletBCollision()
+{
+    // Collision detection with walls
+    if (X > 425)
+        X = 425;
+    else if (X < 50) {
+        X = 50;
+    }
+    if (Y < (window_height / 2 + 100))
+        Y = (window_height / 2 + 100);
+    else if (Y > 690) {
+        Y = 690;
+    }
+}
+
+//Get distance between any two points
 double GetDistance(double x1, double y1, double x2, double y2) {
     return sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2));
 }
