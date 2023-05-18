@@ -15,9 +15,6 @@ RGBpixmap MalletR;
 RGBpixmap MalletB;
 RGBpixmap Galaxy;
 
-double TX = window_width / 2 - 60;
-double TY = window_height - 140;
-
 double Rz = 1;
 
 UINT prevFrameTime = -1;
@@ -50,6 +47,9 @@ bool MouseMoved = false;
 int  X = window_width / 2 - 60;
 int  Y = 20;
 
+double TX = window_width / 2 - 60;
+double TY = window_height - 140;
+
 int screenSwitch = 0;
 
 int lb = 0;
@@ -80,19 +80,19 @@ void OnSpecialKeyPress(int key, int x, int y)
     switch (key)
     {
     case GLUT_KEY_LEFT://		Left function key
-        TX -= 15;
+        TX -= 25;
         sndPlaySound(TEXT("crash.wav"), SND_ASYNC);
         break;
     case GLUT_KEY_RIGHT://		Right function key
-        TX += 15;
+        TX += 25;
         sndPlaySound(TEXT("crash.wav"), SND_ASYNC);
         break;
-    case GLUT_KEY_UP://		Jump function key
-        TY -= 20;
+    case GLUT_KEY_UP://		Up function key
+        TY += 25;
         sndPlaySound(TEXT("jump.wav"), SND_ASYNC);
         break;
-    case GLUT_KEY_DOWN://		Jump function key
-        TY += 20;
+    case GLUT_KEY_DOWN://		Down function key
+        TY -= 25;
         sndPlaySound(TEXT("jump.wav"), SND_ASYNC);
         break;
     };
@@ -127,6 +127,33 @@ void DrawGoal(int scoreX, int scoreY1, int scoreY2) {
 
     glRasterPos2i(scoreX, scoreY2);
     for (char c : score1STR)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+    }
+    glPopMatrix();
+}
+
+void DrawEnd(int buttonX, int buttonY, string buttonText, string win) {
+
+    glRasterPos2i(window_width / 2 - 100, window_height - 150);
+
+    for (char c : win)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+    }
+
+    glColor3f(0.5, 0.5, 0.5);  // Set button color
+    glBegin(GL_QUADS);
+    glVertex2i(buttonX, buttonY);
+    glVertex2i(buttonX + 200, buttonY);
+    glVertex2i(buttonX + 200, buttonY + buttonHeight);
+    glVertex2i(buttonX, buttonY + buttonHeight);
+    glEnd();
+
+    glColor3f(1.0, 1.0, 0.0);  // Set text color
+    glPushMatrix();
+    glRasterPos2i(buttonX + 20, buttonY + 20);
+    for (char c : buttonText)
     {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
     }
@@ -217,9 +244,7 @@ void PuckCollision()
 {
     boolean wallCollision = false;
 
-    //to get normal of point of collision get center of puck and center of mallet
-    // get angle between two vectors
-    // get dot product of 2 vectors to get angle betwen them 
+
     // Collision detection with walls
     if (puckX + puckRadius > window_width - 50) {
         wallCollision = true;
@@ -264,8 +289,13 @@ void PuckCollision()
         score1++;
     }
 
-    PuckMalletCollision(puckX, puckY, X, Y);
+    // Getting Distance between Center of Puck and Center of Mallet to get the Normal Point of Collision
+    // Getting angle between two vectors
+    // Getting dot product of 2 vectors to get angle betwen them 
 
+    // Puck and Red Mallet
+    PuckMalletCollision(puckX, puckY, X, Y);
+    // Puck and Blue Mallet
     PuckMalletCollision(puckX, puckY, TX, TY);
 
 }
@@ -324,6 +354,7 @@ void GameScreen() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     SetTransformations();
+
     glEnable(GL_TEXTURE_2D);
 
     glPushMatrix();
@@ -340,6 +371,12 @@ void GameScreen() {
 
     DrawGoal(scoreX, scoreY1, scoreY2);
 
+    if (score1STR == "6") {
+        screenSwitch = 2;
+    }
+    else if (score2STR == "6") {
+        screenSwitch = 2;
+    }
 
     //glEnable(GL_TEXTURE_2D);
     glPushMatrix();
@@ -385,6 +422,30 @@ void StartScreen() {
     glutSwapBuffers();
 }
 
+void EndScreen(float R, float B, string win) {
+    glClearColor(R, 0.0, B, 0.0);
+    // Clear the window
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    SetTransformations();
+
+    //string win = "PlAYER 1 WINS!";
+    string buttonReplay = "Play Again?";
+    string buttonExit = "Exit";
+    // Button position
+    const int ReplayButtonX = 200;
+    const int ReplayButtonY = 400;
+    DrawEnd(ReplayButtonX, ReplayButtonY, buttonReplay, win);
+    const int ExitButtonX = 200;
+    const int ExitButtonY = 250;
+    DrawEnd(ExitButtonX, ExitButtonY, buttonExit, win);
+
+
+    // Swap the buffers
+    glFlush();
+    glutSwapBuffers();
+}
+
 void OnDisplay() {
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -402,11 +463,28 @@ void OnDisplay() {
         exit(0);
     }
 
+    if (screenSwitch == 2) {
+        if (X + 60 >= 200 && X + 60 <= 400 && Y + 60 >= 400 && Y + 60 <= 450) {
+            cout << "Mouse position " << X << " , " << Y << endl;
+            screenSwitch = 1;
+        }
+        if (X + 60 >= 250 && X + 60 <= 400 && Y + 60 >= 250 && Y + 60 <= 300) {
+            cout << "Mouse position " << X << " , " << Y << endl;
+            exit(0);
+        }
+    }
+
     if (screenSwitch == 0) {
         StartScreen();
     }
     if (screenSwitch == 1) {
         GameScreen();
+    }
+    if (screenSwitch == 2 && score1STR == "6") {
+        EndScreen(1.0, 0.0, "PlAYER 1 WINS!");
+    }
+    else if (screenSwitch == 2 && score2STR == "6") {
+        EndScreen(0.0, 1.0, "PlAYER 2 WINS!");
     }
 }
 
