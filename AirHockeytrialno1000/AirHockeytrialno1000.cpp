@@ -271,16 +271,14 @@ void PuckCollision()
     if (puckY + puckRadius < 5) {
         puckX = window_width / 2;
         puckY = window_height / 2;
-        glRasterPos2f(window_width / 2 - 60, 20);
-        MalletR.draw();
-        //Sleep(3000);
+
         PuckCollision();
         score2++;
     }
     else if (puckY - puckRadius > window_height - 5) {
         puckX = window_width / 2;
         puckY = window_height / 2;
-        //Sleep(3000);
+
         PuckCollision();
         score1++;
     }
@@ -404,13 +402,11 @@ void GameScreen() {
     // Draw puck
     DrawPuck();
 
-
-
     // Swap the buffers
     glFlush();
     glutSwapBuffers();
 
-    if (score1STR == "6" || score2STR == "6") {
+    if (score1 == 6 || score2 == 6) {
        // puckReset();
 
         screenSwitch = 2;
@@ -500,10 +496,10 @@ void OnDisplay() {
     if (screenSwitch == 1) {
         GameScreen();
     }
-    if (screenSwitch == 2 && score1STR == "6") {
+    if (screenSwitch == 2 && score1 == 6) {
         EndScreen(1.0, 0.0, "PlAYER 1 WINS!");
     }
-    else if (screenSwitch == 2 && score2STR == "6") {
+    if (screenSwitch == 2 && score2 == 6) {
         EndScreen(0.0, 1.0, "PlAYER 2 WINS!");
     }
 }

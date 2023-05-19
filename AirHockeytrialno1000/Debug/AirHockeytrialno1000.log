@@ -1,3 +1,6 @@
 ﻿  AirHockeytrialno1000.cpp
 C:\xampp\htdocs\seif\2D-Air-Hockey\AirHockeytrialno1000\AirHockeytrialno1000.cpp(108,23): warning C4018: '<': signed/unsigned mismatch
+  RGBpixmap.cpp
+C:\xampp\htdocs\seif\2D-Air-Hockey\AirHockeytrialno1000\RGBpixmap.cpp(150,7): warning C4101: 'dum': unreferenced local variable
+  Generating Code...
   AirHockeytrialno1000.vcxproj -> C:\xampp\htdocs\seif\2D-Air-Hockey\Debug\AirHockeytrialno1000.exe
