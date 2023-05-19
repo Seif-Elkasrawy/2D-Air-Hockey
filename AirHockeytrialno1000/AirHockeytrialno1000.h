@@ -9,3 +9,5 @@ void MalletRCollision();
 void MalletBCollision();
 
 void DrawPuck();
+
+void puckReset();

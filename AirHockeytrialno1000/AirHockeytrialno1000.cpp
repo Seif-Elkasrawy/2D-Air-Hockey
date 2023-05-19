@@ -81,19 +81,15 @@ void OnSpecialKeyPress(int key, int x, int y)
     {
     case GLUT_KEY_LEFT://		Left function key
         TX -= 25;
-        sndPlaySound(TEXT("crash.wav"), SND_ASYNC);
         break;
     case GLUT_KEY_RIGHT://		Right function key
         TX += 25;
-        sndPlaySound(TEXT("crash.wav"), SND_ASYNC);
         break;
     case GLUT_KEY_UP://		Up function key
         TY += 25;
-        sndPlaySound(TEXT("jump.wav"), SND_ASYNC);
         break;
     case GLUT_KEY_DOWN://		Down function key
         TY -= 25;
-        sndPlaySound(TEXT("jump.wav"), SND_ASYNC);
         break;
     };
 }
@@ -244,7 +240,7 @@ void PuckCollision()
 {
     boolean wallCollision = false;
 
-
+    
     // Collision detection with walls
     if (puckX + puckRadius > window_width - 50) {
         wallCollision = true;
@@ -307,7 +303,10 @@ void PuckMalletCollision(int puckX, int puckY, int X, int Y)
     // Check if the puck collides with the mallet
     if ((distance <= puckRadius + malletWidth / 2.0 - 10))
     {
-        R = 1.0f;
+        sndPlaySound(TEXT("Beer_bottles_hit_together.wav"), SND_ASYNC);
+
+
+        //R = 1.0f;
 
         // Calculate the angle between the puck and the mallet
         float angle = atan2(puckY - (Y + malletHeight / 2.0), puckX - (X + malletWidth / 2.0));
@@ -320,8 +319,8 @@ void PuckMalletCollision(int puckX, int puckY, int X, int Y)
         puckSpeedX = newSpeedX;
         puckSpeedY = newSpeedY;
     }
-    else
-        R = 0.0f;
+   /* else
+        R = 0.0f;*/
 }
 
 void SetTransformations() {
@@ -345,6 +344,24 @@ void DrawPuck()
         glVertex2f(x, y);
     }
     glEnd();
+}
+
+void puckReset()
+{
+    /*puckX = window_width / 2;
+    puckY = window_height / 2;*/
+
+    score1STR = "0";
+    score2STR = "0";
+
+    X = window_width / 2 - 60;
+    Y = 20;
+
+    TX = window_width / 2 - 60;
+    TY = window_height - 140;
+
+   // puckSpeedX = 0.0f;
+   // puckSpeedY = 0.0f;
 }
 
 void GameScreen() {
@@ -371,13 +388,6 @@ void GameScreen() {
 
     DrawGoal(scoreX, scoreY1, scoreY2);
 
-    if (score1STR == "6") {
-        screenSwitch = 2;
-    }
-    else if (score2STR == "6") {
-        screenSwitch = 2;
-    }
-
     //glEnable(GL_TEXTURE_2D);
     glPushMatrix();
     glPixelZoom(5, 5);
@@ -394,9 +404,19 @@ void GameScreen() {
     // Draw puck
     DrawPuck();
 
+
+
     // Swap the buffers
     glFlush();
     glutSwapBuffers();
+
+    if (score1STR == "6" || score2STR == "6") {
+       // puckReset();
+
+        screenSwitch = 2;
+
+        sndPlaySound(TEXT("cartoon_success.wav"), SND_ASYNC);
+    }
 }
 
 void StartScreen() {
